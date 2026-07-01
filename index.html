@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Henry — Your Tab Guardian</title>
+  <meta name="description" content="Henry watches your tabs, pauses background videos and sleeps idle ones to save energy, battery and the planet!">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green:     #22c55e;
+      --green-d:   #16a34a;
+      --green-dd:  #14532d;
+      --green-l:   #4ade80;
+      --mint:      #f0fdf4;
+      --sage:      #dcfce7;
+      --border:    #bbf7d0;
+      --text:      #1a2e1e;
+      --muted:     #4d7a5a;
+      --card:      #ffffff;
+      --blue:      #3b82f6;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--mint);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(240,253,244,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1.5px solid var(--border);
+      padding: 0 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 20px; font-weight: 900; color: var(--text);
+      text-decoration: none;
+    }
+
+    .nav-logo-img {
+      width: 34px; height: 34px; border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(34,197,94,.25);
+    }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 28px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 14px; font-weight: 600; color: var(--muted);
+      text-decoration: none; transition: color .15s;
+    }
+    .nav-links a:hover { color: var(--green-d); }
+
+    .nav-cta {
+      background: var(--green); color: #fff;
+      border: none; border-radius: 99px;
+      padding: 9px 20px; font-size: 14px; font-weight: 800;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 2px 12px rgba(34,197,94,.35);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(34,197,94,.45); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 80px 5% 60px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% -10%, rgba(34,197,94,.18), transparent),
+        radial-gradient(ellipse 40% 30% at 80% 60%, rgba(74,222,128,.10), transparent);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: var(--sage); border: 1.5px solid var(--border);
+      padding: 5px 14px; border-radius: 99px;
+      font-size: 12px; font-weight: 800; color: var(--green-d);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-bottom: 22px;
+    }
+
+    .hero-mascot {
+      width: 100px; height: 100px; border-radius: 28px;
+      box-shadow: 0 12px 40px rgba(34,197,94,.3), 0 4px 16px rgba(0,0,0,.08);
+      margin: 0 auto 24px;
+      display: block;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 68px);
+      font-weight: 900; letter-spacing: -2px; line-height: 1.08;
+      color: var(--text); margin-bottom: 18px;
+    }
+
+    .hero h1 span { color: var(--green-d); }
+
+    .hero-sub {
+      font-size: clamp(16px, 2.2vw, 20px);
+      color: var(--muted); max-width: 560px; margin: 0 auto 36px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex; align-items: center; justify-content: center;
+      gap: 14px; flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 9px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #fff; border: none; border-radius: 14px;
+      padding: 14px 28px; font-size: 15px; font-weight: 800;
+      cursor: pointer; text-decoration: none;
+      box-shadow: 0 4px 20px rgba(22,163,74,.35);
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(22,163,74,.45); }
+
+    .btn-secondary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: var(--text);
+      border: 1.5px solid var(--border); border-radius: 14px;
+      padding: 13px 22px; font-size: 14px; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      transition: transform .15s, border-color .15s;
+    }
+    .btn-secondary:hover { transform: translateY(-1px); border-color: var(--green); }
+
+    .hero-note {
+      font-size: 12px; color: #9ca3af; margin-top: 16px;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: flex; justify-content: center; gap: 0;
+      background: #fff; border-top: 1.5px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
+      padding: 20px 5%;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      flex: 1; min-width: 140px; text-align: center;
+      padding: 10px 20px;
+      border-right: 1.5px solid var(--border);
+    }
+    .stat-item:last-child { border-right: 0; }
+
+    .stat-num {
+      font-size: 28px; font-weight: 900; color: var(--green-d);
+      line-height: 1; letter-spacing: -1px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+    /* ── FEATURES ── */
+    .section {
+      padding: 80px 5%;
+      max-width: 1100px; margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 12px; font-weight: 800; color: var(--green-d);
+      text-transform: uppercase; letter-spacing: .08em;
+      margin-bottom: 10px; display: block;
+    }
+
+    .section h2 {
+      font-size: clamp(26px, 4vw, 42px); font-weight: 900;
+      letter-spacing: -1px; line-height: 1.15; margin-bottom: 14px;
+    }
+
+    .section-sub {
+      font-size: 16px; color: var(--muted); max-width: 520px;
+      line-height: 1.6; margin-bottom: 48px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 20px; padding: 28px;
+      box-shadow: 0 2px 16px rgba(34,197,94,.06);
+      transition: transform .18s, box-shadow .18s;
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(34,197,94,.12); }
+
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; margin-bottom: 18px;
+    }
+    .icon-green { background: var(--sage); }
+    .icon-blue  { background: #dbeafe; }
+    .icon-amber { background: #fef9c3; }
+    .icon-pink  { background: #fce7f3; }
+
+    .feature-card h3 {
+      font-size: 17px; font-weight: 800; margin-bottom: 8px; color: var(--text);
+    }
+    .feature-card p {
+      font-size: 14px; color: var(--muted); line-height: 1.6;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      background: #fff;
+      border-top: 1.5px solid var(--border);
+      border-bottom: 1.5px solid var(--border);
+      padding: 80px 5%;
+    }
+
+    .how-inner {
+      max-width: 900px; margin: 0 auto; text-align: center;
+    }
+
+    .steps {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0; margin-top: 48px; position: relative;
+    }
+
+    .step {
+      padding: 0 28px; text-align: center; position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: "→";
+      position: absolute; right: -8px; top: 28px;
+      font-size: 20px; color: var(--border);
+    }
+
+    .step-num {
+      width: 52px; height: 52px; border-radius: 16px;
+      background: var(--sage); border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; margin: 0 auto 16px;
+      font-weight: 900; color: var(--green-d);
+    }
+    .step h4 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
+    .step p  { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+    /* ── POINTS ── */
+    .points-section {
+      padding: 80px 5%;
+      max-width: 1100px; margin: 0 auto;
+    }
+
+    .points-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px; margin-top: 40px;
+    }
+
+    .point-card {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 18px; padding: 22px;
+      display: flex; align-items: center; gap: 16px;
+      box-shadow: 0 2px 12px rgba(34,197,94,.05);
+    }
+
+    .point-icon {
+      width: 46px; height: 46px; border-radius: 14px;
+      background: var(--sage); display: flex; align-items: center;
+      justify-content: center; font-size: 22px; flex-shrink: 0;
+    }
+
+    .point-info h4 { font-size: 14px; font-weight: 800; margin-bottom: 3px; }
+    .point-info p  { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+    .point-pts {
+      font-size: 20px; font-weight: 900; color: var(--green-d);
+      margin-left: auto; flex-shrink: 0;
+    }
+
+    .levels-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; margin-top: 36px;
+    }
+
+    .level-chip {
+      background: var(--card); border: 1.5px solid var(--border);
+      border-radius: 99px; padding: 7px 16px;
+      font-size: 13px; font-weight: 700; color: var(--text);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .level-chip .pts { font-size: 11px; color: var(--muted); }
+
+    /* ── INSTALL ── */
+    .install-section {
+      background: linear-gradient(135deg, #14532d 0%, #166534 60%, #15803d 100%);
+      padding: 80px 5%;
+      text-align: center;
+    }
+
+    .install-section h2 {
+      font-size: clamp(28px, 4vw, 46px); font-weight: 900;
+      letter-spacing: -1px; color: #fff; margin-bottom: 14px;
+    }
+
+    .install-section p {
+      font-size: 16px; color: rgba(255,255,255,.75);
+      max-width: 480px; margin: 0 auto 36px; line-height: 1.6;
+    }
+
+    .install-steps {
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px; flex-wrap: wrap; margin-top: 36px;
+    }
+
+    .install-step {
+      display: flex; align-items: center; gap: 9px;
+      background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+      border-radius: 12px; padding: 12px 16px;
+      font-size: 13px; font-weight: 700; color: #fff;
+    }
+
+    .install-step-num {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--green-l); color: var(--green-dd);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 900; flex-shrink: 0;
+    }
+
+    .install-arrow {
+      font-size: 18px; color: rgba(255,255,255,.3);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--text); color: rgba(255,255,255,.6);
+      padding: 32px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+
+    .footer-logo {
+      display: flex; align-items: center; gap: 9px;
+      font-size: 16px; font-weight: 800; color: #fff;
+      text-decoration: none;
+    }
+
+    .footer-logo img {
+      width: 28px; height: 28px; border-radius: 8px;
+    }
+
+    footer p { font-size: 13px; }
+    footer a { color: var(--green-l); text-decoration: none; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .nav-links { display: none; }
+      .step:not(:last-child)::after { display: none; }
+      .stat-item { border-right: 0; border-bottom: 1.5px solid var(--border); }
+      .stat-item:last-child { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#">
+      <img class="nav-logo-img" src="icons/icon48.png" alt="Henry">
+      Henry
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#points">Points</a></li>
+      <li><a href="#install">Install</a></li>
+    </ul>
+    <a class="nav-cta" href="#install">Get Henry free →</a>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">🌿 Free Chrome Extension</div>
+    <img class="hero-mascot" src="icons/icon128.png" alt="Henry">
+    <h1>Meet <span>Henry</span>,<br>your tab guardian.</h1>
+    <p class="hero-sub">Henry watches your open tabs so you don't have to. He pauses background videos the moment you leave them, and gently puts idle tabs to sleep — saving battery, energy and the planet!</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#install">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Install for Chrome — it's free
+      </a>
+      <a class="btn-secondary" href="#how">See how it works →</a>
+    </div>
+    <p class="hero-note">No account needed · No data collected · Open source</p>
+  </section>
+
+  <!-- Stats strip -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Free, forever</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">Data collected</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6+</div>
+      <div class="stat-label">Smart features</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Energy saved</div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div id="features">
+    <div class="section">
+      <span class="section-label">Features</span>
+      <h2>Everything Henry does<br>to look after your tabs</h2>
+      <p class="section-sub">Six smart features, nothing bloated. Henry is small, fast, and always asks before doing anything drastic.</p>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">▶️</div>
+          <h3>Instant video pause</h3>
+          <p>The moment you switch away from a tab with a playing video, Henry appears on your new tab asking if you'd like to pause it. One click — done. Saves serious CPU and battery.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-green">💤</div>
+          <h3>Tab sleep</h3>
+          <p>Henry periodically scans for tabs you haven't visited in a while and flags them. You choose which ones to sleep — or enable auto-sleep to let Henry handle it. Tabs reload the moment you visit them again.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">👁</div>
+          <h3>Always asks first</h3>
+          <p>Henry never does anything without your say-so. Every action shows a friendly card on your current tab — you're always in control. Enable auto-pause or auto-sleep if you prefer a hands-off approach.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-pink">⭐</div>
+          <h3>Eco score & levels</h3>
+          <p>Earn points for every eco action — pausing videos, sleeping tabs, closing idle tabs, and keeping a daily streak. Level up through 8 unique animal companions, each with their own world and look.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-green">🛡</div>
+          <h3>Exempt any tab</h3>
+          <p>Music, dashboards, work tools — click any tab in Henry's list to mark it exempt by URL. Henry will never flag, sleep, or touch it — even across browser restarts.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">⏱</div>
+          <h3>Auto-sleep timer</h3>
+          <p>Set a custom inactivity timer — Henry will pause all background videos and sleep all idle tabs automatically after you step away. Perfect for keeping your machine cool overnight.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-amber">😴</div>
+          <h3>Idle video pause</h3>
+          <p>Haven't touched your computer in 30 minutes? Henry automatically pauses any videos still playing in the background — no wasted energy while you're away.</p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon icon-blue">⚡</div>
+          <h3>Lightweight by design</h3>
+          <p>Henry runs as a Chrome service worker with zero external requests. No analytics, no servers, no subscriptions. Just a tiny guardian living in your browser.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- How it works -->
+  <div id="how" class="how-section">
+    <div class="how-inner">
+      <span class="section-label" style="display:block;text-align:center;">How it works</span>
+      <h2>Henry in four steps</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h4>Install Henry</h4>
+          <p>Add the extension to Chrome. Henry starts watching your tabs immediately — no setup required.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h4>Henry spots things</h4>
+          <p>He notices when you leave a tab with a video playing, or when a tab hasn't been visited in a while.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h4>You decide</h4>
+          <p>A friendly card appears on your current tab. Pause the video, sleep the tab, or keep it — your choice.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <h4>Earn points</h4>
+          <p>Every eco action earns you points. Level up, build streaks, and watch your Eco Score grow.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Points -->
+  <div id="points">
+    <div class="points-section">
+      <span class="section-label">Eco Score</span>
+      <h2>Save energy,<br>earn points</h2>
+      <p class="section-sub" style="margin-bottom:0;">Henry rewards you for real eco actions — no fake carbon numbers, just honest stats.</p>
+
+      <div class="points-grid">
+        <div class="point-card">
+          <div class="point-icon">⏸</div>
+          <div class="point-info">
+            <h4>Pause a video</h4>
+            <p>Per video paused in background</p>
+          </div>
+          <div class="point-pts">+10</div>
+        </div>
+        <div class="point-card">
+          <div class="point-icon">💤</div>
+          <div class="point-info">
+            <h4>Sleep a tab</h4>
+            <p>Per tab put to sleep</p>
+          </div>
+          <div class="point-pts">+5</div>
+        </div>
+        <div class="point-card">
+          <div class="point-icon">🔥</div>
+          <div class="point-info">
+            <h4>Daily streak</h4>
+            <p>+10 pts per streak day, plus +5 every 10-day milestone</p>
+          </div>
+          <div class="point-pts">+10+</div>
+        </div>
+        <div class="point-card">
+          <div class="point-icon">✕</div>
+          <div class="point-info">
+            <h4>Close an idle tab</h4>
+            <p>Per tab closed from Henry's queue</p>
+          </div>
+          <div class="point-pts">+5</div>
+        </div>
+      </div>
+
+      <div class="levels-row">
+        <div class="level-chip">🌱 Henry the Cat <span class="pts">0 pts</span></div>
+        <div class="level-chip">🌺 Jay the Parrot <span class="pts">300 pts</span></div>
+        <div class="level-chip">🪷 Lisa the Frog <span class="pts">550 pts</span></div>
+        <div class="level-chip">🌵 Marco the Gecko <span class="pts">800 pts</span></div>
+        <div class="level-chip">🪸 Monet the Clownfish <span class="pts">1,200 pts</span></div>
+        <div class="level-chip">🌊 Sally the Sea Turtle <span class="pts">1,800 pts</span></div>
+        <div class="level-chip">🎋 Charlie the Giant Panda <span class="pts">2,500 pts</span></div>
+        <div class="level-chip">✨ Gold Henry the Legend <span class="pts">3,500 pts</span></div>
+      </div>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:18px;max-width:480px;margin-left:auto;margin-right:auto;">
+        Each level unlocks a new animal companion with its own unique extension design and world — discover them as you go. 🌍
+      </p>
+    </div>
+  </div>
+
+  <!-- Install -->
+  <div id="install" class="install-section">
+    <img src="icons/icon128.png" alt="Henry" style="width:80px;height:80px;border-radius:22px;margin:0 auto 22px;display:block;box-shadow:0 8px 32px rgba(0,0,0,.3);">
+    <h2>Get Henry for free</h2>
+    <p>Install in seconds, no account needed. Henry works immediately after installation.</p>
+
+    <a class="btn-primary" href="https://chrome.google.com/webstore" target="_blank" style="font-size:16px;padding:16px 32px;margin:0 auto;display:inline-flex;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Add Henry to Chrome
+    </a>
+
+    <div class="install-steps">
+      <div class="install-step"><span class="install-step-num">1</span> Click "Add Henry to Chrome"</div>
+      <div class="install-arrow">→</div>
+      <div class="install-step"><span class="install-step-num">2</span> Confirm in Chrome dialog</div>
+      <div class="install-arrow">→</div>
+      <div class="install-step"><span class="install-step-num">3</span> Henry starts watching 👀</div>
+    </div>
+
+    <p style="font-size:13px;color:rgba(255,255,255,.4);margin-top:28px;">
+      Chrome 102+ required · Manifest V3 · No external servers
+    </p>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <a class="footer-logo" href="#">
+      <img src="icons/icon48.png" alt="Henry">
+      Henry
+    </a>
+    <p>Made with 💚 · Free and open source</p>
+    <p>
+      <a href="#install">Install</a> ·
+      <a href="#features">Features</a> ·
+      <a href="https://github.com/ecotab/henry" target="_blank">GitHub</a>
+    </p>
+  </footer>
+
+  <section id="privacy" style="max-width:680px;margin:60px auto;padding:0 24px 60px;">
+    <h2 style="font-size:22px;font-weight:800;color:#15803d;margin-bottom:16px;">Privacy Policy</h2>
+    <p style="font-size:15px;line-height:1.7;color:#374151;margin-bottom:12px;">
+      Henry does not collect, transmit, or share any browsing data. All information — your points, stats, settings, and tab activity — stays entirely on your device using Chrome's local storage. Nothing ever leaves your browser.
+    </p>
+    <p style="font-size:15px;line-height:1.7;color:#374151;margin-bottom:12px;">
+      Henry requires access to all tabs solely to detect background videos and identify idle tabs. No third party receives any data. There are no analytics, no tracking, and no servers.
+    </p>
+    <p style="font-size:13px;color:#6b7280;">Last updated: July 2026</p>
+  </section>
+
+</body>
+</html>
